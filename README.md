@@ -2,6 +2,7 @@
 *The script for writing the slc calibrations into the Calibration frame of a GCD*
 
 __author__ = Federico Bontempo KIT PhD student <federico.bontempo@kit.edu>
+
 ! special thanks to Katherine Rawlins for the help !
 
 Files description:
