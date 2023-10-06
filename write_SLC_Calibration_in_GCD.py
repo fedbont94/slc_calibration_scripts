@@ -16,7 +16,10 @@ env-shell.sh python3 write_SLC_Calibration_in_GCD.py \
 
 TODO: 
     1. Check if the SLC calibration values for chip = 2 are correct 
-    2. Do the crossover which I don't even know what it is or how to set it.
+    2. Set the correct crossover values
+    3. Add the SetCrossOver and GetCrossOver methods to:
+        -> src/dataclasses/public/dataclasses/calibration/I3IceTopSLCCalibration.h
+        -> src/dataclasses/private/pybindings/I3Calibration/I3VEMCalibration.cxx
 """
 
 import argparse
@@ -63,7 +66,7 @@ def __check_args(args):
     return
 
 
-def write_SLC_Calibration_in_GCD(args, frame, gcd_file_out):
+def write_SLC_Calibration_in_GCD(args, frame):
     # This is the calibration frame
     # Load SLC calibration
     with open(args.slcCalibration, "rb") as f:
@@ -100,7 +103,7 @@ def write_SLC_Calibration_in_GCD(args, frame, gcd_file_out):
         time = (startTime + endTime) / 2
 
         # Check if the time is in the timeArr
-        if not np.in1d(time, timeArr):
+        if not (time >= timeArr[0] and time <= timeArr[-1]):
             sys.exit(
                 "Time not in start time and end time of the slc calibration file."
                 + "\nCheck the start time, end time and the slc calibration file"
@@ -121,18 +124,28 @@ def write_SLC_Calibration_in_GCD(args, frame, gcd_file_out):
             int(atwd),
             float(slopesCalibration),
         )
-        # TODO Set the chip = 2 
+
+        # Set the chip = 2 for the unknown chip
         calibration.SetIntercept(
             int(2),
             int(atwd),
-            float(interceptsCalibration), # TODO This is probably not correct
+            float(interceptsCalibration),  # TODO This is probably not correct
         )
         calibration.SetSlope(
             int(2),
             int(atwd),
-            float(slopesCalibration), # TODO This is probably not correct
+            float(slopesCalibration),  # TODO This is probably not correct
         )
-        # TODO Do the crossover which I don't even know what it is or how to set it.
+
+        # TODO Set the correct crossover
+        calibration.SetCrossOver(
+            int(1),
+            float(0.0),
+        )
+        calibration.SetCrossOver(
+            int(12),
+            float(0.0),
+        )
 
         # Set the start and end time of the calibration
         calibration_collection.start_time = dataclasses.I3Time(startTime)
@@ -142,8 +155,8 @@ def write_SLC_Calibration_in_GCD(args, frame, gcd_file_out):
         # Add the calibration to the collection
         calibration_collection.it_slc_cal[omkey] = calibration
 
-        # Add the I3IceTopSLCCalibrationCollection to the frame
-        frame["I3IceTopSLCCalibrationCollection"] = calibration_collection
+    # Add the I3IceTopSLCCalibrationCollection to the frame
+    frame["I3IceTopSLCCalibrationCollection"] = calibration_collection
     return frame
 
 
@@ -156,14 +169,14 @@ def main(args):
     # Get the Calibration frame
     for frame in gcd_file:
         # Check if the frame is the calibration frame
-        if frame.Stop != icetray.I3Frame.Calibration:
+        if frame.Stop == icetray.I3Frame.Calibration:
+            # This is the calibration frame thus we add the the SLC calibration values
+            frame = write_SLC_Calibration_in_GCD(args, frame)
+            gcd_file_out.push(frame)
+        else:
             # This is not the calibration frame and is just pushed to the new GCD file
             gcd_file_out.push(frame)
-            continue
 
-        frame = write_SLC_Calibration_in_GCD(args, frame, gcd_file_out)
-
-        gcd_file_out.push(frame)
     gcd_file_out.close()
     return
 
