@@ -1,15 +1,15 @@
 import glob
 import pickle
 import numpy as np
-
+import multiprocessing as mp
 from icecube import icetray, dataio, vemcal
 
 
-def read_calibrationFromRuns(slccal_dict, files_list):
+def read_calibrationFromRuns(slccal_dict, files_list, r):
     slcdata_name = "I3ITSLCCalData"
 
     for f in sorted(files_list):
-        print(f)
+        print(f"Reading file {f}")
         for frame in dataio.I3File(f):
             # Is this one of the streams you wanted (Q or P)?
             if frame.Stop not in [icetray.I3Frame.Physics]:
@@ -24,6 +24,8 @@ def read_calibrationFromRuns(slccal_dict, files_list):
                 "I3EventHeader"
             ):  # At L2, all frames have an I3EventHeader, but this is not true for PFFilt
                 header = frame["I3EventHeader"]
+                run_id = header.run_id
+                run_time = header.start_time
 
                 ## Run number sanity checks
                 if not header.run_id == r:
@@ -46,7 +48,7 @@ def read_calibrationFromRuns(slccal_dict, files_list):
                 slccal_dict[key][f"atwd{atwd}"] = np.append(
                     slccal_dict[key][f"atwd{atwd}"], [[slcc], [hlcc]], axis=1
                 )
-
+        print(f"Completed file {f}")
     return
 
 
@@ -56,7 +58,7 @@ def main():
 
     files_list = sorted(
         glob.glob(
-            f"/data/exp/IceCube/{yr}/filtered/PFFilt/090[67]/PFFilt_PhysicsFiltering_Run00{r}_Subrun00000000_00000000*.tar.bz2"
+            f"/data/exp/IceCube/{yr}/filtered/PFFilt/090[67]/PFFilt_PhysicsFiltering_Run00{r}_Subrun00000000_000000*.tar.bz2"
         )
     )
 
@@ -75,7 +77,19 @@ def main():
                 "atwd2": np.array([[], []]),
             }
 
-    read_calibrationFromRuns(slccal_dict, files_list)
+    # for each file in file list spawn a process
+    # to read the calibration information
+    # from the slcdata
+    # processes = []
+    # for f in files_list:
+    #     p = mp.Process(target=read_calibrationFromRuns, args=(slccal_dict, [f], r))
+    #     p.start()
+    #     processes.append(p)
+
+    # for p in processes:
+    # p.join()
+
+    read_calibrationFromRuns(slccal_dict, files_list, r)
 
     with open("/data/user/fbontempo/test/SLCCal_test.pkl", "wb") as f:
         pickle.dump(slccal_dict, f)
