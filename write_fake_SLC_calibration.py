@@ -14,7 +14,11 @@ python3 write_fake_SLC_calibration.py \
     --fakeYear <fake year>
 """
 
+<<<<<<< HEAD
 import argparse
+=======
+import argparse 
+>>>>>>> 9a8a5a464515641fed00358c484b8eadab85832d
 import datetime
 import pickle
 import sys
@@ -29,6 +33,7 @@ def get_args():
     p.add_argument(
         "--outputFile", type=str, default="", help="Output path + name + .pkl"
     )
+<<<<<<< HEAD
     p.add_argument(
         "--originalYear",
         type=int,
@@ -38,6 +43,10 @@ def get_args():
     p.add_argument(
         "--fakeYear", type=int, default=0, help="The time of the fake SLC calibration"
     )
+=======
+    p.add_argument("--originalYear", type=int, default=0, help="The time of the original SLC calibration")
+    p.add_argument("--fakeYear", type=int, default=0, help="The time of the fake SLC calibration")
+>>>>>>> 9a8a5a464515641fed00358c484b8eadab85832d
 
     return p.parse_args()
 
@@ -86,15 +95,20 @@ def write_fake_SLC_calibration(args):
     # Calculate the difference in mjd between the original and fake SLC calibration
     timeDifference = datetime.timedelta(days=365) * (args.fakeYear - args.originalYear)
     # Make the time difference in mjd
+<<<<<<< HEAD
     timeDifference = timeDifference.total_seconds() / 86400  # seconds in a day
 
     print("timeDifference: ", timeDifference)
+=======
+    timeDifference = timeDifference.total_seconds() / 86400 # seconds in a day
+>>>>>>> 9a8a5a464515641fed00358c484b8eadab85832d
 
     # Add the difference in mjd to the original SLC cal
     for omkey in fake_slc_calibration.keys():
         # Add the time difference to the time array
         newTime = fake_slc_calibration[omkey][0] + timeDifference
         # Create the new SLC cal
+<<<<<<< HEAD
         newSlcCal = (
             newTime,
             fake_slc_calibration[omkey][1],
@@ -106,6 +120,12 @@ def write_fake_SLC_calibration(args):
     print("Original time: ", slc_calibration[omkey][0])
     print("New time: ", newTime)
 
+=======
+        newSlcCal = (newTime, fake_slc_calibration[omkey][1], fake_slc_calibration[omkey][2])
+        # Add the new SLC cal to the fake SLC cal
+        fake_slc_calibration[omkey] = newSlcCal
+        
+>>>>>>> 9a8a5a464515641fed00358c484b8eadab85832d
     # Write fake SLC calibration
     with open(args.outputFile, "wb") as f:
         pickle.dump(fake_slc_calibration, f)
@@ -113,9 +133,17 @@ def write_fake_SLC_calibration(args):
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9a8a5a464515641fed00358c484b8eadab85832d
     args = get_args()
     __check_args(args)
 
     write_fake_SLC_calibration(args)
 
+<<<<<<< HEAD
     print("-------------------- Program finished --------------------")
+=======
+    print("-------------------- Program finished --------------------")
+>>>>>>> 9a8a5a464515641fed00358c484b8eadab85832d
