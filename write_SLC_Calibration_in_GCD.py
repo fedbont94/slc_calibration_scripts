@@ -26,13 +26,10 @@ import argparse
 import json
 import sys
 
-import scipy
-import numpy as np
-
-
 from icecube import icetray, dataio, dataclasses
 
 from utils.calculate_p0_p1 import calculate_p0_p1
+from utils.utils import tuple_to_str, str_to_tuple
 
 
 def get_args():
@@ -79,14 +76,6 @@ def __check_args(args):
         print("No end time given")
         sys.exit(1)
     return
-
-
-def tuple_to_str(key):
-    return ",".join(str(i) for i in key)
-
-
-def str_to_tuple(key_str):
-    return tuple(key_str.split(","))
 
 
 def write_SLC_Calibration_in_Cframe(args, frame, bad_dom_list):

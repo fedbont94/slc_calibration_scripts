@@ -1,3 +1,4 @@
+import argparse
 import glob
 import json
 import numpy as np
@@ -5,10 +6,21 @@ import numpy as np
 from icecube import icetray, dataio, vemcal
 
 from utils.crossover_points import calculate_crossOverPoints
-from utils.calculate_p0_p1 import calculate_p0_p1
+from utils.utils import tuple_to_str, str_to_tuple
 
 
-def read_calibrationFromRuns(slc_hlc_q_dict, slc_hlc_sum_q_dict, files_list, r):
+def get_args():
+    p = argparse.ArgumentParser()
+    p.add_argument("--runDir", type=str, default="", help="Run directory")
+    p.add_argument("--runNumb", type=int, default=0, help="Run number")
+    p.add_argument("--year", type=int, default=0, help="Year")
+    p.add_argument("--outputDir", type=str, default="", help="Output directory")
+    return p.parse_args()
+
+
+def read_calibrationFromRuns(
+    slc_hlc_q_dict, slc_hlc_sum_q_dict, files_list, runNumb, startTime=None
+):
     slcdata_name = "I3ITSLCCalData"
 
     for f in sorted(files_list):
@@ -23,20 +35,21 @@ def read_calibrationFromRuns(slc_hlc_q_dict, slc_hlc_sum_q_dict, files_list, r):
 
             slcdata = frame[slcdata_name]
 
-            if frame.Has(
-                "I3EventHeader"
-            ):  # At Lv2, all frames have an I3EventHeader, but this is not true for PFFilt
+            # At Lv2, all frames have an I3EventHeader, but this is not true for PFFilt
+            if frame.Has("I3EventHeader"):
                 header = frame["I3EventHeader"]
 
-                # if start is None:
-                #     start = header.start_time
-                #     end = header.end_time
-                # if end < header.end_time:
-                #     end = header.end_time
+                if startTime is None:
+                    startTime = header.start_time
+                    endTime = header.end_time
+                if endTime < header.end_time:
+                    endTime = header.end_time
 
-            ## Run number sanity checks
-            if not header.run_id == r:
-                SystemExit("I3EventHeader and I3ITSLCCalItem run numbers do not match!")
+                ## Run number sanity checks
+                if not header.run_id == runNumb:
+                    SystemExit(
+                        "I3EventHeader and I3ITSLCCalItem run numbers do not match!"
+                    )
 
             itemlist = slcdata.HLC_vs_SLC_Hits
 
@@ -65,30 +78,14 @@ def read_calibrationFromRuns(slc_hlc_q_dict, slc_hlc_sum_q_dict, files_list, r):
                 slc_hlc_sum_q_dict[omkey][f"chip{chip}atwd{atwd}"]["xy"] += slcc * hlcc
 
         print(f"Completed file {f}")
-    return
+    return startTime, endTime
 
 
-def tuple_to_str(key):
-    return ",".join(str(i) for i in key)
+def main(args):
+    files_list = sorted(glob.glob(f"{args.runDir}"))
 
-
-def str_to_tuple(key_str):
-    return tuple(key_str.split(","))
-
-
-def main():
-    r = 138329
-    yr = 2023
-
-    files_list = sorted(
-        glob.glob(
-            f"/data/exp/IceCube/{yr}/filtered/PFFilt/090[67]/PFFilt_PhysicsFiltering_Run00{r}_Subrun00000000_00000000*.tar.bz2"
-        )
-    )
-
-    # Create a dictionary of OMKeys
-    # with empty arrays for each ATWD
-    # array shape: (2, 0)
+    # Create a dictionary of OMKeys with
+    # empty arrays for each ATWD array shape: (2, 0)
     # 1. array slc calibration
     # 2. array hlc calibration
     slc_hlc_q_dict = {}
@@ -122,12 +119,9 @@ def main():
                 for cakey in chipATWDkeys
             }
 
-            # "run": r,
-            # "start_time": start_time,
-            # "end_time": end_time,
-    read_calibrationFromRuns(slc_hlc_q_dict, slc_hlc_sum_q_dict, files_list, r)
-
-    # p0_p1_dict = calculate_p0_p1(slc_hlc_sum_q_dict)
+    startTime, endTime = read_calibrationFromRuns(
+        slc_hlc_q_dict, slc_hlc_sum_q_dict, files_list, args.runNumb
+    )
 
     crossOvers_dict = calculate_crossOverPoints(slc_hlc_q_dict, bad_doms_list=[])
 
@@ -138,13 +132,13 @@ def main():
         tuple_to_str(key): value for key, value in crossOvers_dict.items()
     }
 
-    with open("/data/user/fbontempo/test/chargeSums_dict.json", "w") as f:
+    with open(f"/data/user/fbontempo/test/chargeSums_dict.json", "w") as f:
         json.dump(save_dict_charges, f)
-    with open("/data/user/fbontempo/test/crossOvers_dict.json", "w") as f:
+    with open(f"/data/user/fbontempo/test/crossOvers_dict.json", "w") as f:
         json.dump(save_dict_crossOvers, f)
     return
 
 
 if __name__ == "__main__":
-    main()
+    main(args=get_args())
     print("-------------------- Program finished --------------------")

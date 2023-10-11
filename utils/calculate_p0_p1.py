@@ -1,4 +1,3 @@
-import pickle
 import numpy as np
 from icecube import icetray, vemcal, dataclasses
 from icecube.icetray.i3logging import (
@@ -6,13 +5,7 @@ from icecube.icetray.i3logging import (
     log_fatal,
 )
 
-
-def tuple_to_str(key):
-    return ",".join(str(i) for i in key)
-
-
-def str_to_tuple(key_str):
-    return tuple(key_str.split(","))
+from utils.utils import tuple_to_str, str_to_tuple
 
 
 def get_calibration_values(sums_dict, string, om, chip, atwd, result_dict):
@@ -109,18 +102,22 @@ def calculate_p0_p1(slcATW_dict, bad_dom_list=[]):
     least squares. The p0 and p1 values are saved in a dictionary with the
     following structure:
     result_dict = {
-        (string, om, chip, atwd): {
-            "n": n, # number of charges which were summed to calculate the p0 and p1 values
-            "p0": p0,
-            "p1": p1,
-            "p0_error": p0_error,
-            "p1_error": p1_error,
-            "chi2": chi2,
-            "x": x, # sum of the charges
-            "xx": xx, # sum of the squared charges
-            "y": y, # sum of the log10(slc/hlc) charges
-            "yy": yy, # sum of the squared log10(slc/hlc) charges
-            "xy": xy, # sum of the product of the charges and log10(slc/hlc) charges
+        (string, om) = {
+            (chip, atwd) = {
+                "n": n, # number of charges which were summed to calculate the p0 and p1 values
+                "p0": p0,
+                "p1": p1,
+                "p0_error": p0_error,
+                "p1_error": p1_error,
+                "chi2": chi2,
+                "x": x, # sum of the charges
+                "xx": xx, # sum of the squared charges
+                "y": y, # sum of the log10(slc/hlc) charges
+                "yy": yy, # sum of the squared log10(slc/hlc) charges
+                "xy": xy, # sum of the product of the charges and log10(slc/hlc) charges
+
+            ... keep going for each (chip, atwd) ...
+        ... keep going for each (string, om) ...
         }
     }
     """
