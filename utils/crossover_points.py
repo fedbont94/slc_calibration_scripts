@@ -33,8 +33,18 @@ def findIntersection(fun1, fun2, weight1, weight2, lower, upper):
     return brentq(lambda x: weight1 * fun1(x) - weight2 * fun2(x), lower, upper)
 
 
-def calculate_crossOverPoints(file, pathSave="", doPlotting=False):
-    slcATW_dict = load_chargesFromFile(file)
+def calculate_crossOverPoints(
+    slcATW_dict, bad_doms_list, pathSave="", doPlotting=False
+):
+    """
+    Calculate the crossover points of the SLC calibration values.
+    Use the scipy.stats.gaussian_kde function to calculate the kernel density estimation of the charges.
+    Then use the scipy.optimize.brentq function to find the intersection of the two kde functions.
+    The crossover points are saved in a dictionary with the following structure:
+    crossOverPoints_dict = {
+        OMKey: (crossover_point_01, crossover_point_12)
+    }
+    """
     crossOverPoints_dict = {}
 
     # Loop over all OMKeys
@@ -62,30 +72,36 @@ def calculate_crossOverPoints(file, pathSave="", doPlotting=False):
         charge_binning = np.linspace(-1, 6, 71)
         charge_bin_width = charge_binning[1] - charge_binning[0]
 
-        if len0:
+        if len0 > 1:
             med0 = np.median(atwd0)
             kde0 = gaussian_kde(atwd0)
             weight0 = len(slcATW_dict[key]["atwd0"][0]) * charge_bin_width
-        if len1:
+        if len1 > 1:
             med1 = np.median(atwd1)
             kde1 = gaussian_kde(atwd1)
             weight1 = len(slcATW_dict[key]["atwd1"][0]) * charge_bin_width
-        if len2:
+        if len2 > 1:
             med2 = np.median(atwd2)
             kde2 = gaussian_kde(atwd2)
             weight2 = len(slcATW_dict[key]["atwd2"][0]) * charge_bin_width
 
-        if len0 and len1:
-            cop01_kde = findIntersection(kde0, kde1, weight0, weight1, med0, med1)
-        if len1 and len2:
-            cop12_kde = findIntersection(kde1, kde2, weight1, weight2, med1, med2)
+        if (len0 > 1) and (len1 > 1):
+            try:
+                cop01_kde = findIntersection(kde0, kde1, weight0, weight1, med0, med1)
+            except:
+                cop01_kde = np.nan
+        if (len1 > 1) and (len2 > 1):
+            try:
+                cop12_kde = findIntersection(kde1, kde2, weight1, weight2, med1, med2)
+            except:
+                cop12_kde = np.nan
 
         # Check if the OMKey has charges in all ATWDs
         # and save the crossover points in the dictionary
-        if len0 and len1 and len2:
+        if (len0 > 1) and (len1 > 1) and (len2 > 1):
             crossOverPoints_dict[key] = (cop01_kde, cop12_kde)
-        elif (key[0], key[1], key[2]) in [(74, 61, 0), (39, 61, 0)]:
-            # Dead DOMs "OMKey(74,61,0)" and "OMKey(39,61,0)"
+        elif key in bad_doms_list:
+            # e.g. 2022 dead DOMs "OMKey(74,61,0)" and "OMKey(39,61,0)"
             continue
         else:
             # Give a run warning
@@ -194,5 +210,5 @@ def plot_histWithCrossOverPoints(slcATW_dict, pathSave, charge_array_kde):
                 transform=axes[station, om].transAxes,
             )
 
-    plt.savefig(f"{pathSave}/SLCCal_first_results_linear.png", bbox_inches="tight")
+    plt.savefig(f"{pathSave}SLCCal_first_results_linear.png", bbox_inches="tight")
     plt.close()
