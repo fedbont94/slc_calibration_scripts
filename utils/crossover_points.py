@@ -12,7 +12,6 @@ Federico Bontempo KIT PhD student <federico.bontempo@kit.edu>
 When running the main script, simply import calculate_crossOverPoints and give the path to the .pkl file as argument.
 """
 
-import glob
 import pickle
 import numpy as np
 

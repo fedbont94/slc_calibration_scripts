@@ -5,8 +5,6 @@ from icecube.icetray.i3logging import (
     log_fatal,
 )
 
-from utils.utils import tuple_to_str, str_to_tuple
-
 
 def get_calibration_values(sums_dict, string, om, chip, atwd, result_dict):
     """
@@ -61,35 +59,28 @@ def get_calibration_values(sums_dict, string, om, chip, atwd, result_dict):
         if sums_dict["n"] > 2:
             log_fatal("This will cause a fatal NaN error later.")
 
-    result_dict[tuple_to_str((string, om))][tuple_to_str((chip, atwd))] = {}
-    result_dict[tuple_to_str((string, om))][tuple_to_str((chip, atwd))]["p0"] = a
-    result_dict[tuple_to_str((string, om))][tuple_to_str((chip, atwd))]["p1"] = b
+    result_dict[(string, om, chip, atwd)] = {}
+    result_dict[(string, om, chip, atwd)]["p0"] = a
+    result_dict[(string, om, chip, atwd)]["p1"] = b
     if sums_dict["n"] <= 2:
         log_warn(
             f"This OM has a n={sums_dict['n']}, which is <=2: ({string},{om},{chip},{atwd})",
             unit="vemcal",
         )
-        result_dict[tuple_to_str((string, om))][tuple_to_str((chip, atwd))][
-            "p0_error"
-        ] = -1
-        result_dict[tuple_to_str((string, om))][tuple_to_str((chip, atwd))][
-            "p1_error"
-        ] = -1
+        result_dict[(string, om, chip, atwd)]["p0_error"] = -1
+        result_dict[(string, om, chip, atwd)]["p1_error"] = -1
     else:
-        result_dict[tuple_to_str((string, om))][tuple_to_str((chip, atwd))][
-            "p0_error"
-        ] = aerr * np.sqrt(chi2 / (sums_dict["n"] - 2))
-        result_dict[tuple_to_str((string, om))][tuple_to_str((chip, atwd))][
-            "p1_error"
-        ] = berr * np.sqrt(chi2 / (sums_dict["n"] - 2))
-    result_dict[tuple_to_str((string, om))][tuple_to_str((chip, atwd))][
-        "n"
-    ] = sums_dict["n"]
-    result_dict[tuple_to_str((string, om))][tuple_to_str((chip, atwd))]["chi2"] = chi2
+        result_dict[(string, om, chip, atwd)]["p0_error"] = aerr * np.sqrt(
+            chi2 / (sums_dict["n"] - 2)
+        )
+        result_dict[(string, om, chip, atwd)]["p1_error"] = berr * np.sqrt(
+            chi2 / (sums_dict["n"] - 2)
+        )
+    result_dict[(string, om, chip, atwd)]["n"] = sums_dict["n"]
+    result_dict[(string, om, chip, atwd)]["chi2"] = chi2
+
     # Extend tth result_dict with the sum_dict
-    result_dict[tuple_to_str((string, om))][tuple_to_str((chip, atwd))].update(
-        sums_dict
-    )
+    result_dict[(string, om, chip, atwd)].update(sums_dict)
 
     return
 
@@ -101,30 +92,26 @@ def calculate_p0_p1(slcATW_dict, bad_dom_list=[]):
     for each ATWD and chips. The p0 and p1 values are calculated using the method of
     least squares. The p0 and p1 values are saved in a dictionary with the
     following structure:
-    result_dict = {
-        (string, om) = {
-            (chip, atwd) = {
-                "n": n, # number of charges which were summed to calculate the p0 and p1 values
-                "p0": p0,
-                "p1": p1,
-                "p0_error": p0_error,
-                "p1_error": p1_error,
-                "chi2": chi2,
-                "x": x, # sum of the charges
-                "xx": xx, # sum of the squared charges
-                "y": y, # sum of the log10(slc/hlc) charges
-                "yy": yy, # sum of the squared log10(slc/hlc) charges
-                "xy": xy, # sum of the product of the charges and log10(slc/hlc) charges
+    result_dict[(string, om, chip, atwd)]= {
+            "n": n, # number of charges which were summed to calculate the p0 and p1 values
+            "p0": p0,
+            "p1": p1,
+            "p0_error": p0_error,
+            "p1_error": p1_error,
+            "chi2": chi2,
+            "x": x, # sum of the charges
+            "xx": xx, # sum of the squared charges
+            "y": y, # sum of the log10(slc/hlc) charges
+            "yy": yy, # sum of the squared log10(slc/hlc) charges
+            "xy": xy, # sum of the product of the charges and log10(slc/hlc) charges
 
-            ... keep going for each (chip, atwd) ...
-        ... keep going for each (string, om) ...
+        ... keep going for each (string, om, chip, atwd) ...
+
         }
-    }
     """
     result_dict = {}
     for omkey, sums_dict in slcATW_dict.items():
-        string, om, _ = str_to_tuple(omkey)
-        result_dict[tuple_to_str((string, om))] = {}
+        string, om = omkey.string, omkey.om
         for atwd in range(3):
             for chip in range(2):
                 get_calibration_values(

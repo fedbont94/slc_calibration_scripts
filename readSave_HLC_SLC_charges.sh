@@ -10,4 +10,18 @@ $ENV $PYTHON $SCRIPT \
     --runDir "/data/exp/IceCube/2023/filtered/PFFilt/090[67]/PFFilt_PhysicsFiltering_Run00138329_Subrun00000000_00000000*.tar.bz2" \
     --runNumb 138329 \
     --year 2023 \
-    --outputDir "/data/user/fbontempo/test/" 
+    --outputDir "/data/user/fbontempo/test/" \
+    --frameType "P" \
+    --frameKey "I3ITSLCCalData" \
+    --saveJsonl \
+    --savePickle
+
+# $ENV $PYTHON $SCRIPT \
+#     --runDir "/data/user/jsaffer/Data/SLC_calibration/Level2_with_I3SLCCalData_2012_burnsample_run120160.i3" \
+#     --runNumb 120160 \
+#     --year 2012 \
+#     --outputDir "/data/user/fbontempo/test/" \
+#     --frameType "Q" \
+#     --frameKey "I3ITSLCCalData" \
+#     --saveJsonl \
+#     --savePickle
