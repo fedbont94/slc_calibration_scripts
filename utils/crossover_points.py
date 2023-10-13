@@ -112,7 +112,7 @@ def calculate_crossOverPoints(
         # Check if the OMKey has charges in all ATWDs
         # and save the crossover points in the dictionary
         if (len0 > 1) and (len1 > 1) and (len2 > 1):
-            crossOverPoints_dict[key] = (cop01_kde, cop12_kde)
+            crossOverPoints_dict[key] = (10**cop01_kde, 10**cop12_kde)
         elif key in bad_doms_list:
             # e.g. 2022 dead DOMs "OMKey(74,61,0)" and "OMKey(39,61,0)"
             continue

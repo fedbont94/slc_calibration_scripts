@@ -130,9 +130,9 @@ def save_jsonl(p0_p1_dict, crossOvers_dict, startTime, endTime, args):
             if crossOvers_dict.get(omkey) is None:
                 cop = -1
             elif (chip == 0) and (atwd == 0):
-                cop = 10 ** (crossOvers_dict[omkey][0])
+                cop = crossOvers_dict[omkey][0]
             elif (chip == 0) and (atwd == 1):
-                cop = 10 ** (crossOvers_dict[omkey][1])
+                cop = crossOvers_dict[omkey][1]
             else:
                 cop = -1
 
