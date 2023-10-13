@@ -18,7 +18,7 @@ Options
     --runNumb: Run number for which the calibration is being performed.
     --year: Year of the calibration.
     --outputDir: Path to the directory where the results will be saved.
-    --frameType: Frame type, either "Q" or "P".
+    --frameType: Frame type, either "Q" and/or "P".
     --frameKey: Frame object name for the SLC calibration data.
     --saveJsonl: Save the results in a JSONL file.
     --savePickle: Save the results in a pickle file.
@@ -65,7 +65,7 @@ def get_args():
     p.add_argument("--runNumb", type=int, default=0, help="Run number")
     p.add_argument("--year", type=int, default=0, help="Year")
     p.add_argument("--outputDir", type=str, default="", help="Output directory")
-    p.add_argument("--frameType", type=str, default="", help="Frame type either Q or P")
+    p.add_argument("--frameType", type=str, default="", help="Frame type either Q and/or P")
     p.add_argument(
         "--frameKey",
         type=str,
@@ -218,7 +218,13 @@ def read_calibrationFromRuns(
         print(f"Reading file {f}")
         for frame in dataio.I3File(f):
             # Is this one of the streams you wanted (Q or P)?
-            if frame.Stop not in [icetray.I3Frame.DAQ, icetray.I3Frame.Physics]:
+            frameType = [] 
+            if "Q" in args.frameType:
+                frameType.append(icetray.I3Frame.DAQ)
+            if "P" in args.frameType:
+                frameType.append(icetray.I3Frame.Physics)
+                
+            if frame.Stop not in frameType:
                 continue
             # IF there is no slc calibration information, skip
             if slcdata_name not in frame:
