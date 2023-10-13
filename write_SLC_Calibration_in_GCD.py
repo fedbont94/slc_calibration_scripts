@@ -15,9 +15,8 @@ env-shell.sh python3 write_SLC_Calibration_in_GCD.py \
     --endTime <end time>
 
 TODO: 
-    1. Check if the SLC calibration values for chip = 2 are correct 
-    2. Set the correct crossover values
-    3. Add the SetCrossOver and GetCrossOver methods to:
+    1. Check if the script is consistent with the readSave_... script
+    2. Add the SetCrossOver and GetCrossOver methods to:
         -> src/dataclasses/public/dataclasses/calibration/I3IceTopSLCCalibration.h
         -> src/dataclasses/private/pybindings/I3Calibration/I3VEMCalibration.cxx
 """

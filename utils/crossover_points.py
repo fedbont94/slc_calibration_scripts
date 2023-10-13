@@ -9,7 +9,7 @@ Julian Saffer KIT PhD student <julian.saffer@kit.edu>
 Federico Bontempo KIT PhD student <federico.bontempo@kit.edu>
 ! special thanks to Katherine Rawlins for the help !
 
-When running the main script, simply import calculate_crossOverPoints and give the path to the .pkl file as argument.
+When running the main script, simply import calculate_crossOverPoints
 """
 
 import pickle
@@ -43,6 +43,20 @@ def calculate_crossOverPoints(
     crossOverPoints_dict = {
         OMKey: (crossover_point_01, crossover_point_12)
     }
+    ----------------------------------------------
+    Parameters:
+        slcATW_dict: A dictionary of OMKeys with a list of slc and hlc charges for each ATWD and chips.
+        bad_dom_list: A list of bad DOMs (default is an empty list).
+        pathSave: A path to save the plots (default is an empty string).
+        doPlotting: A boolean to decide if the plots should be saved (default is False).
+        (The plots are not fully implemented yet.)
+
+    Returns:
+        crossOverPoints_dict: A dictionary containing the crossover points for each OMKey.
+        crossOverPoints_dict = {
+            OMKey: (crossover_point_01, crossover_point_12)
+            ...
+        }
     """
     crossOverPoints_dict = {}
 
@@ -117,6 +131,15 @@ def calculate_crossOverPoints(
 
 
 def plot_histWithCrossOverPoints(slcATW_dict, pathSave, charge_array_kde):
+    """
+    Plot the histograms of the SLC calibration values with the crossover points.
+    This is not fully implemented yet. Nor tested.
+    ----------------------------------------------
+    Parameters:
+        slcATW_dict: A dictionary of OMKeys with a list of slc and hlc charges for each ATWD and chips.
+        pathSave: A path to save the plots.
+        charge_array_kde: The charge array for the kernel density estimation.
+    """
     import matplotlib.pyplot as plt
 
     fig, axes = plt.subplots(81, 4, figsize=(25, 162 * 1.5))

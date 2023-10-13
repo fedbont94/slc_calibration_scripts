@@ -1,3 +1,48 @@
+#! /usr/bin/env python3
+"""
+This script provides a data processing pipeline for getting the calibration constants needed for the SLC calibration. 
+It reads input files containing calibration data and performs necessary calculations to obtain calibration parameters (p0, p1) and crossover points. 
+The results can be saved in JSONL and pickle file formats.
+
+__author__ = Federico Bontempo KIT PhD student <federico.bontempo@kit.edu>
+! special thanks to Katherine Rawlins for the help !
+
+Usage:
+Ensure you have the necessary dependencies installed, including the IceCube software framework.
+
+Run the script using Python in the icetray environment:
+    python3 readSave_HLC_SLC_charges.py [options]
+    
+Options
+    --runDir: Path to the directory containing the calibration data for a specific run.
+    --runNumb: Run number for which the calibration is being performed.
+    --year: Year of the calibration.
+    --outputDir: Path to the directory where the results will be saved.
+    --frameType: Frame type, either "Q" or "P".
+    --frameKey: Frame object name for the SLC calibration data.
+    --saveJsonl: Save the results in a JSONL file.
+    --savePickle: Save the results in a pickle file.
+
+Functions:
+    get_args(): Parses the command-line arguments and returns the arguments as a namespace.
+    __check_args(args): Checks if the required arguments are provided and exits the program if any are missing.
+    save_jsonl(): Saves the calibration results, including p0, p1, and crossover points, in a JSONL file.
+    save_pickle(): Saves the calibration results, including p0, p1, and crossover points, in pickle files.
+    read_calibrationFromRuns(): Reads calibration data from input files and extracts calibration information for further processing.
+    main(): Main function to coordinate the calibration process and save the results.
+
+Dependencies:
+    argparse: For parsing command-line arguments.
+    glob: For finding files matching a specified pattern.
+    json: For handling JSON data.
+    pickle: For serializing and deserializing Python objects.
+    sys: For system-specific parameters and functions.
+    numpy: For numerical operations and array handling.
+    icecube: The IceCube software framework for data handling and calculations.
+    utils.crossover_points: Custom utility function to calculate crossover points.
+    utils.calculate_p0_p1: Custom utility function to calculate p0 and p1 calibration parameters.
+"""
+
 import argparse
 import glob
 import json
@@ -12,6 +57,9 @@ from utils.calculate_p0_p1 import calculate_p0_p1
 
 
 def get_args():
+    """
+    Parse the command-line arguments and return the arguments as a namespace.
+    """
     p = argparse.ArgumentParser()
     p.add_argument("--runDir", type=str, default="", help="Run directory")
     p.add_argument("--runNumb", type=int, default=0, help="Run number")
@@ -34,6 +82,12 @@ def get_args():
 
 
 def __check_args(args):
+    """
+    Check if the required arguments are provided and exit the program if any are missing.
+    ----------------------------------
+    Parameters:
+        args: Command-line arguments.
+    """
     if args.runDir == "":
         print("No run directory given")
         sys.exit(1)
@@ -57,6 +111,13 @@ def __check_args(args):
 def save_jsonl(p0_p1_dict, crossOvers_dict, startTime, endTime, args):
     """
     Save the p0 and p1 and corssover points values in a jsonl file
+    ----------------------------------
+    Parameters:
+        p0_p1_dict: A dictionary containing the calculated p0 and p1 values, errors, chi-squared values, and other related statistics for each OMKey.
+        crossOvers_dict: A dictionary containing the crossover points for each OMKey.
+        startTime: Start time of the calibration.
+        endTime: End time of the calibration.
+        args: Command-line arguments.
     """
     fileName = (
         f"{args.outputDir}/Run{args.runNumb}_{args.year}ITSLCChargeCalResults.jsonl"
@@ -142,6 +203,17 @@ def read_calibrationFromRuns(
     startTime=None,
     slcdata_name="I3ITSLCCalData",
 ):
+    """
+    Read calibration data from input files and extract calibration information for further processing.
+    ----------------------------------
+    Parameters:
+        slc_hlc_q_dict: A dictionary of OMKeys with empty arrays for each ATWD array shape: (2, 0).
+        slc_hlc_sum_q_dict: A dictionary of OMKeys with empty dictionaries for each chip and ATWD.
+        files_list: A list of files containing the runs data.
+        runNumb: Run number for which the calibration is being performed.
+        startTime: Start time of the calibration.
+        slcdata_name: Frame object name for the SLC calibration data.
+    """
     for f in sorted(files_list):
         print(f"Reading file {f}")
         for frame in dataio.I3File(f):
@@ -201,6 +273,12 @@ def read_calibrationFromRuns(
 
 
 def main(args):
+    """
+    Main function to coordinate the calibration process and save the results.
+    ----------------------------------
+    Parameters:
+        args: Command-line arguments.
+    """
     __check_args(args=args)
 
     files_list = sorted(glob.glob(f"{args.runDir}"))
@@ -249,6 +327,12 @@ def main(args):
     )
 
     crossOvers_dict = calculate_crossOverPoints(slc_hlc_q_dict, bad_doms_list=[])
+    """
+    crossOvers_dict = {
+        OMKey: crossover_atwd01, crossover_atwd12
+        ...
+        }
+    """
     p0_p1_dict = calculate_p0_p1(slc_hlc_sum_q_dict, bad_dom_list=[])
 
     """

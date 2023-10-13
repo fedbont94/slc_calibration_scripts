@@ -1,3 +1,45 @@
+"""
+__author__ = Federico Bontempo KIT PhD student <federico.bontempo@kit.edu>
+
+This script defines two functions:  
+    get_calibration_values 
+    calculate_p0_p1
+
+Here's a summary of what each function does:
+
+get_calibration_values Function:
+    This function calculates the p0 and p1 values for a given OMKey based on provided sums and statistics. 
+    The calculated values and related information are stored in the result_dict.
+
+    Parameters:
+        sums_dict: A dictionary containing sums and statistics necessary for the calculation.
+        string: A string identifier.
+        om: An identifier for the optical module.
+        chip: An identifier for the chip.
+        atwd: An identifier for the analog to waveform digitizer.
+        result_dict: A dictionary to store the results.
+
+calculate_p0_p1 Function:
+    This function calculates the p0 and p1 values for each OMKey in the input slcATW_dict. 
+    The calculations are based on the method of least squares. 
+    The results, along with related statistics, are stored in the result_dict.
+
+    Parameters:
+        slcATW_dict: A dictionary of OMKeys with a list of slc and hlc charges for each ATWD and chips.
+        bad_dom_list: A list of bad DOMs (default is an empty list).
+        Returns:
+        result_dict: A dictionary containing the calculated p0 and p1 values, errors, chi-squared values, and other related statistics for each OMKey.
+
+The calculate_p0_p1 function iterates over OMKeys and uses 
+the get_calibration_values function to calculate p0 and p1 values for each combination of OMKey, chip, and ATWD. 
+It also sums the charges from two chips and calculates p0 and p1 for the combined values. 
+The results are then returned in the result_dict.
+
+The get_calibration_values function calculates p0 and p1 values using a least squares method and stores the results in the result_dict. 
+It also handles cases where the calculated values might not be valid.
+"""
+
+
 import numpy as np
 from icecube import icetray, vemcal, dataclasses
 from icecube.icetray.i3logging import (
@@ -9,6 +51,14 @@ from icecube.icetray.i3logging import (
 def get_calibration_values(sums_dict, string, om, chip, atwd, result_dict):
     """
     Calculate the p0 and p1 values for a given OMKey.
+    ----------------------------------------------
+    Parameters:
+        sums_dict: A dictionary containing sums and statistics necessary for the calculation.
+        string: A string identifier.
+        om: An identifier for the optical module.
+        chip: An identifier for the chip.
+        atwd: An identifier for the analog to waveform digitizer.
+        result_dict: A dictionary to store the results.
     """
     delta = sums_dict["n"] * sums_dict["xx"] - sums_dict["x"] ** 2
 
@@ -108,7 +158,14 @@ def calculate_p0_p1(slcATW_dict, bad_dom_list=[]):
         ... keep going for each (string, om, chip, atwd) ...
 
         }
+    ----------------------------------------------
+    Parameters:
+        slcATW_dict: A dictionary of OMKeys with a list of slc and hlc charges for each ATWD and chips.
+        bad_dom_list: A list of bad DOMs (default is an empty list).
+        Returns:
+        result_dict: A dictionary containing the calculated p0 and p1 values, errors, chi-squared values, and other related statistics for each OMKey.
     """
+
     result_dict = {}
     for omkey, sums_dict in slcATW_dict.items():
         string, om = omkey.string, omkey.om
