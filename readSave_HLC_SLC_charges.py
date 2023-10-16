@@ -65,7 +65,9 @@ def get_args():
     p.add_argument("--runNumb", type=int, default=0, help="Run number")
     p.add_argument("--year", type=int, default=0, help="Year")
     p.add_argument("--outputDir", type=str, default="", help="Output directory")
-    p.add_argument("--frameType", type=str, default="", help="Frame type either Q and/or P")
+    p.add_argument(
+        "--frameType", type=str, default="", help="Frame type either Q and/or P"
+    )
     p.add_argument(
         "--frameKey",
         type=str,
@@ -200,6 +202,7 @@ def read_calibrationFromRuns(
     slc_hlc_sum_q_dict,
     files_list,
     runNumb,
+    frameType,
     startTime=None,
     slcdata_name="I3ITSLCCalData",
 ):
@@ -218,13 +221,13 @@ def read_calibrationFromRuns(
         print(f"Reading file {f}")
         for frame in dataio.I3File(f):
             # Is this one of the streams you wanted (Q or P)?
-            frameType = [] 
-            if "Q" in args.frameType:
-                frameType.append(icetray.I3Frame.DAQ)
-            if "P" in args.frameType:
-                frameType.append(icetray.I3Frame.Physics)
-                
-            if frame.Stop not in frameType:
+            framesList = []
+            if "Q" in frameType:
+                framesList.append(icetray.I3Frame.DAQ)
+            if "P" in frameType:
+                framesList.append(icetray.I3Frame.Physics)
+
+            if frame.Stop not in framesList:
                 continue
             # IF there is no slc calibration information, skip
             if slcdata_name not in frame:
@@ -329,6 +332,7 @@ def main(args):
         slc_hlc_sum_q_dict=slc_hlc_sum_q_dict,
         files_list=files_list,
         runNumb=args.runNumb,
+        frameType=args.frameType,
         slcdata_name=args.frameKey,
     )
 
