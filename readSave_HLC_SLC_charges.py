@@ -131,9 +131,9 @@ def save_jsonl(p0_p1_dict, crossOvers_dict, startTime, endTime, args):
             # check if the key is there aka if the dom is not dead
             if crossOvers_dict.get(omkey) is None:
                 cop = -1
-            elif (chip == 0) and (atwd == 0):
+            elif atwd == 0:
                 cop = crossOvers_dict[omkey][0]
-            elif (chip == 0) and (atwd == 1):
+            elif atwd == 1:
                 cop = crossOvers_dict[omkey][1]
             else:
                 cop = -1

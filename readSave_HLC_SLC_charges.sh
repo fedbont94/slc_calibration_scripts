@@ -16,8 +16,8 @@ eval `/cvmfs/icecube.opensciencegrid.org/py3-v4.1.0/setup.sh`
 echo test 2.1 2012
 
 $ENV $PYTHON $SCRIPT \
-    --runDir "/data/user/jsaffer/Data/SLC_calibration/Level2_with_I3SLCCalData_2012_MC_proton12360.i3" \
-    --runNumb 120160 \
+    --runDir "/data/user/jsaffer/Data/SLC_calibration/Level2_with_I3SLCCalData_2012_MC_iron12362.i3" \
+    --runNumb 12362 \
     --year 2012 \
     --outputDir "/data/user/fbontempo/slcCalibration/test/" \
     --frameType "Q" \
