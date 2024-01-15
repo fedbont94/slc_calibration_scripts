@@ -246,10 +246,10 @@ def read_calibrationFromRuns(
                     endTime = header.end_time
 
                 ## Run number sanity checks
-                if not header.run_id == runNumb:
-                    SystemExit(
-                        "I3EventHeader and I3ITSLCCalItem run numbers do not match!"
-                    )
+                # if not header.run_id == runNumb:
+                #     SystemExit(
+                #         "I3EventHeader and I3ITSLCCalItem run numbers do not match!"
+                #     )
 
             itemlist = slcdata.HLC_vs_SLC_Hits
 

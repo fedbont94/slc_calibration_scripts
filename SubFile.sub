@@ -1,0 +1,12 @@
+#!/bin/bash
+#SBATCH --job-name=ProtonDetectorResponse
+#SBATCH --output=/home/hk-project-pevradio/rn8463/log/logLv2SLC/%j.out
+#SBATCH --error=/home/hk-project-pevradio/rn8463/log/logLv2SLC/%j.err
+#SBATCH --account="hk-project-pevradio"
+#SBATCH --nodes=1
+#SBATCH --time=2-00:00:00
+#SBATCH --mem=200gb
+#SBATCH --export=NONE
+
+cp -r $HOME/cvmfsexec/ /scratch/slurm_tmpdir/job_${SLURM_JOB_ID}/
+/scratch/slurm_tmpdir/job_${SLURM_JOB_ID}/cvmfsexec/cvmfsexec icecube.opensciencegrid.org -- /bin/bash /home/hk-project-pevradio/rn8463/slc_calibration_scripts/Level2_pulseExtractor.sh
