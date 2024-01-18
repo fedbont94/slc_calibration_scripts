@@ -1,3 +1,30 @@
+"""
+# Script Documentation
+
+## Overview
+
+The provided script is designed for processing IceCube data using the IceTray framework. 
+The script involves extracting HLC charges and saving them as SLC charges for future calibration. 
+Additionally, it performs cleanup by removing unnecessary frame objects.
+
+## Usage
+
+The script can be run from the command line and accepts several optional arguments:
+
+- `--gcd`: Path to the Geometry, Calibration, and Detector (GCD) file.
+- `--infiles`: Path or pattern to the input IceCube data files.
+- `--outfile`: Path to the output IceCube data file.
+
+### Example Usage
+
+```bash
+python script_name.py --gcd /path/to/gcd.i3 --infiles "/path/to/data/*.i3" --outfile /path/to/output.i3
+```
+
+__author__ = "Saffer, Julian", "Bontempo, Federico"
+"""
+
+
 import glob
 import argparse
 
@@ -5,12 +32,6 @@ from I3Tray import I3Tray
 
 from icecube import icetray, dataclasses, dataio, vemcal
 from icecube.filterscripts.icetop_slccal import ExtractHLCsAsSLCs
-
-# from icecube.filterscripts.vemcal import IceTopVEMCal
-
-# gcd = '/cvmfs/icecube.opensciencegrid.org/data/GCD/GeoCalibDetectorStatus_2012.56063_V1_OctSnow.i3.gz'
-# infiles = '/hkfs/work/workspace/scratch/rn8463-gamma-detectorResponse/filtered/level2/Level2_IC86.2012_corsika_icetop.14000/data/**/*.i3.bz2'
-# outfile = '/hkfs/work/workspace/scratch/rn8463-lv3_Simulations/gamma/2012/slcCalibration/Level2_with_I3SLCCalData_2012_MC_sibyll2.3d_gamma.i3.bz2'
 
 
 def get_args():

@@ -38,3 +38,9 @@ Files description:
         is the shell script that can be used for running the python script. 
         Modify the variables accordingly
 
+    Level2_pulseExtractor.py: 
+        The script involves extracting HLC charges and saving them as SLC charges for calibration. 
+    
+    Level2_pulseExtractor.sh
+        is the shell script that can be used for running the python script. 
+        Modify the variables accordingly
